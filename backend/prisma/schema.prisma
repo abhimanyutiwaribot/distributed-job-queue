@@ -12,16 +12,16 @@ datasource db {
   provider = "postgresql"
 }
 
-model Jobs {
+model Job {
   id         String    @id @unique @default(uuid())
   job_type   JobType
   idem_key   String?   @unique
   payload    Json
-  status     JobStatus
+  status     JobStatus @default(PENDING)
   attempts   Int       @default(0)
   createdAt  DateTime  @default(now())
-  lockedAt   DateTime
-  updatedAt  DateTime
+  lockedAt   DateTime?
+  updatedAt  DateTime  @updatedAt
 }
 
 enum JobStatus {
