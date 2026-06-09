@@ -4,10 +4,10 @@ import { createJob, getAllJob, getJobById } from "./job.controller";
 export const jobRouter = Router();
 
 // get all jobs
-jobRouter.get("/jobs", (req, res) => getAllJob)
+jobRouter.get("/jobs", getAllJob)
 
 // get a job
-jobRouter.get("/jobs/:id", (req, res) => getJobById )
+jobRouter.get("/jobs/:id", getJobById)
 
 // create a job
-jobRouter.post("/jobs", (req, res) => createJob)
+jobRouter.post("/jobs", createJob)
