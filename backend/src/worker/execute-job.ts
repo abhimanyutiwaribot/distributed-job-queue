@@ -4,16 +4,20 @@ import { sendEmailHandler } from "../handler/sent-email.handler";
 type Job = {
   id: string,
   job_type: "SEND_EMAIL",
-  payload: unknown
+  payload: unknown,
+  attempts: number,
+  availableAt: Date
 }
 
 const handlers = {
   SEND_EMAIL: sendEmailHandler
 }
 
+const MAX_RETRIES = 3;
+
 export async function executeJob(job: Job) {
-  
-  console.log("Processing: " + job.id);
+
+  console.log(process.pid + " Processing: " + job.id);
 
   const jobHandler = handlers[job.job_type]
 
@@ -35,15 +39,18 @@ export async function executeJob(job: Job) {
     })
   }
   catch (error) {
+    const updateAttempts = job.attempts + 1;    
     await prisma.job.update({
       where: {
         id: job.id
       },
       data: {
-        status: "FAILED"
+        status: updateAttempts >= MAX_RETRIES ? "FAILED" : "PENDING",
+        attempts: updateAttempts,
+        availableAt: new Date(Date.now() + 5000)
       }
     })
 
-    throw error;
+    console.error(`Job ${job.id} failed : ${error}`)
   }
 }

@@ -3,7 +3,10 @@ import { prisma } from "../database/db";
 export async function claimJob(){
   const job = await prisma.job.findFirst({
     where: {
-      status: "PENDING"
+      status: "PENDING",
+      availableAt: {
+        lte: new Date()
+      }
     },
     orderBy: {
       createdAt: "asc"
