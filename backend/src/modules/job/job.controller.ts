@@ -23,7 +23,7 @@ export async function createJob(req: Request, res: Response) {
       message: "Job Created",
       data: job
     })
-  } 
+  }
   catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -34,18 +34,32 @@ export async function createJob(req: Request, res: Response) {
 
 export async function getAllJob(req: Request, res: Response) {
   try {
-    const service = await getAllJobService()
+    const jobs = await getAllJobService();
+    return res.status(200).json({
+      message: "Fetched All Jobs",
+      data: jobs
+    })
   }
-  catch(error){
-
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error"
+    })
   }
 }
 
 export async function getJobById(req: Request, res: Response) {
-  try{
-    const service = await getJobByIdService()
+  try {
+    const job = await getJobByIdService();
+    return res.status(200).json({
+      message: "Fetched Job",
+      data: job
+    })
   }
-  catch(error){
-
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error"
+    })
   }
 }
