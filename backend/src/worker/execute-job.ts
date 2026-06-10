@@ -1,10 +1,10 @@
 import { prisma } from "../database/db";
-import { sendEmailHandler } from "../handler/sent-email.handler";
+import { sendEmailHandler, type SendEmailPayload } from "../handler/sent-email.handler";
 
 type Job = {
   id: string,
   job_type: "SEND_EMAIL",
-  payload: unknown,
+  payload: SendEmailPayload,
   attempts: number,
   availableAt: Date
 }
