@@ -1,10 +1,28 @@
 import type { Request, Response } from "express";
 import { createJobService, getAllJobService, getJobByIdService } from "./job.service";
 import { createJobSchema } from "./job.validation";
+import { IdemKeySchema } from "../../validation/idemKey.validation";
 
 export async function createJob(req: Request, res: Response) {
   try {
     // validation here 
+    const rawIdemKey = req.header("Idempotency-Key");
+
+    if(rawIdemKey && rawIdemKey.length > 100){
+      return res.status(400).json({
+        message: "Invalid Idempotency-Key"
+      })
+    }
+
+    const idemKeyValidate = IdemKeySchema.safeParse(rawIdemKey);
+    
+    if(!idemKeyValidate.success){
+      return res.status(400).json({
+        message: "Invalid Key",
+        error: idemKeyValidate.error.flatten()
+      });
+    }
+    
     const validate = createJobSchema.safeParse(req.body);
 
     if (!validate.success) {
