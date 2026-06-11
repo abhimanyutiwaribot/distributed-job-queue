@@ -25,6 +25,17 @@ model Job {
   availableAt DateTime @default(now())
 }
 
+model IdempotencyKey {
+  idemKey String @id
+  jobId String 
+  createdAt DateTime @default(now())
+}
+
+enum IdempotencyStatus {
+  PROCESSING
+  COMPLETED
+}
+
 enum JobStatus {
   PENDING
   PROCESSING
