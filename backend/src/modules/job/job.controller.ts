@@ -22,7 +22,9 @@ export async function createJob(req: Request, res: Response) {
         error: idemKeyValidate.error.flatten()
       });
     }
-    
+
+    const idemKey = idemKeyValidate.data ?? crypto.randomUUID();
+
     const validate = createJobSchema.safeParse(req.body);
 
     if (!validate.success) {
@@ -34,7 +36,7 @@ export async function createJob(req: Request, res: Response) {
     }
 
     // then go to service
-    const job = await createJobService(validate.data);
+    const job = await createJobService(validate.data, idemKey);
 
     // return the res
     return res.status(201).json({
