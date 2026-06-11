@@ -26,9 +26,10 @@ model Job {
 }
 
 model IdempotencyKey {
-  idemKey String @id
-  jobId String 
-  createdAt DateTime @default(now())
+  idemKey   String    @id
+  jobId     String 
+  status    IdempotencyStatus
+  createdAt DateTime  @default(now())
 }
 
 enum IdempotencyStatus {
