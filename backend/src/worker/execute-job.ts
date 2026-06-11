@@ -38,24 +38,28 @@ export async function executeJob(job: Job) {
       }
     })
 
-    await jobHandler(job.payload)
+    await jobHandler(job.payload);
 
-    await prisma.idempotencyKey.update({
-      where: {
-        idemKey: job.idem_key
-      },
-      data: {
-        status: "COMPLETED"
-      }
-    })
+    await prisma.$transaction(async () => {
+  
+      await prisma.idempotencyKey.update({
+        where: {
+          idemKey: job.idem_key
+        },
+        data: {
+          status: "COMPLETED"
+        }
+      })
+  
+      await prisma.job.update({
+        where: {
+          id: job.id
+        },
+        data: {
+          status: "COMPLETED"
+        }
+      })
 
-    await prisma.job.update({
-      where: {
-        id: job.id
-      },
-      data: {
-        status: "COMPLETED"
-      }
     })
   }
   catch (error) {
