@@ -14,16 +14,23 @@ export async function createJob(req: Request, res: Response) {
       })
     }
 
-    const idemKeyValidate = IdemKeySchema.safeParse(rawIdemKey);
-    
-    if(!idemKeyValidate.success){
-      return res.status(400).json({
-        message: "Invalid Key",
-        error: idemKeyValidate.error.flatten()
-      });
-    }
+    let idemKey: string;
 
-    const idemKey = idemKeyValidate.data ?? crypto.randomUUID();
+    if(rawIdemKey){
+      const idemKeyValidate = IdemKeySchema.safeParse(rawIdemKey);
+      
+      if(!idemKeyValidate.success){
+        return res.status(400).json({
+          message: "Invalid Key",
+          error: idemKeyValidate.error.flatten()
+        });
+      }
+
+      idemKey = idemKeyValidate.data;
+    }
+    else{
+      idemKey = crypto.randomUUID()
+    }
 
     const validate = createJobSchema.safeParse(req.body);
 

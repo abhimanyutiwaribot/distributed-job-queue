@@ -15,7 +15,7 @@ datasource db {
 model Job {
   id         String    @id @unique @default(uuid())
   job_type   JobType
-  idem_key   String?   @unique
+  idem_key   String   @unique
   payload    Json
   status     JobStatus @default(PENDING)
   attempts   Int       @default(0)

@@ -1,9 +1,11 @@
+import { Prisma } from "../../generated/prisma/client";
 import { prisma } from "../database/db";
 import { sendEmailHandler, type SendEmailPayload } from "../handler/sent-email.handler";
 
 type Job = {
   id: string,
   job_type: "SEND_EMAIL",
+  idem_key: string,
   payload: SendEmailPayload,
   attempts: number,
   availableAt: Date
@@ -26,8 +28,26 @@ export async function executeJob(job: Job) {
       `No handler found for ${job.job_type}`
     )
   }
+
   try {
+    await prisma.idempotencyKey.create({
+      data: {
+        jobId: job.id,
+        status: 'PROCESSING',
+        idemKey: job.idem_key,
+      }
+    })
+
     await jobHandler(job.payload)
+
+    await prisma.idempotencyKey.update({
+      where: {
+        idemKey: job.idem_key
+      },
+      data: {
+        status: "COMPLETED"
+      }
+    })
 
     await prisma.job.update({
       where: {
@@ -39,6 +59,14 @@ export async function executeJob(job: Job) {
     })
   }
   catch (error) {
+    if(
+      error instanceof Prisma.PrismaClientKnownRequestError && 
+      error.code === "P2002"
+    ){
+      console.log("Duplicate idempotency key");
+      return;
+    }
+
     const updateAttempts = job.attempts + 1;    
     await prisma.job.update({
       where: {
