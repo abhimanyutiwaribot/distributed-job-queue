@@ -43,6 +43,7 @@ model DeadLetterJob {
 }
 
 enum IdempotencyStatus {
+  PENDING
   PROCESSING
   COMPLETED
   FAILED
