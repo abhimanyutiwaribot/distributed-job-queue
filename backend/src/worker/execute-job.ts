@@ -30,14 +30,6 @@ export async function executeJob(job: Job) {
   }
 
   try {
-    await prisma.idempotencyKey.create({
-      data: {
-        jobId: job.id,
-        status: 'PROCESSING',
-        idemKey: job.idem_key,
-      }
-    })
-
     await jobHandler(job.payload);
 
     await prisma.$transaction(async (tx) => {
@@ -72,6 +64,7 @@ export async function executeJob(job: Job) {
     }
 
     const updateAttempts = job.attempts + 1;
+    console.log(`retry: ${updateAttempts}`)
 
     if (updateAttempts >= MAX_RETRIES) {
       await prisma.$transaction(async (tx) => {
@@ -84,6 +77,9 @@ export async function executeJob(job: Job) {
             error: String(error)
           }
         });
+
+        console.log(`The job is added to DLQ: ${job.id} \n
+                     Error: ${error} `)
 
         await tx.job.update({
           where: {
