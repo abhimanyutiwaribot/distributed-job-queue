@@ -40,48 +40,82 @@ export async function executeJob(job: Job) {
 
     await jobHandler(job.payload);
 
-    await prisma.$transaction(async () => {
-  
-      await prisma.idempotencyKey.update({
+    await prisma.$transaction(async (tx) => {
+
+      await tx.idempotencyKey.update({
         where: {
           idemKey: job.idem_key
         },
         data: {
-          status: "COMPLETED"
+          status: 'COMPLETED'
         }
       })
-  
-      await prisma.job.update({
+
+      await tx.job.update({
         where: {
           id: job.id
         },
         data: {
-          status: "COMPLETED"
+          status: 'COMPLETED'
         }
       })
 
     })
   }
   catch (error) {
-    if(
-      error instanceof Prisma.PrismaClientKnownRequestError && 
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
-    ){
+    ) {
       console.log("Duplicate idempotency key");
       return;
     }
 
-    const updateAttempts = job.attempts + 1;    
-    await prisma.job.update({
-      where: {
-        id: job.id
-      },
-      data: {
-        status: updateAttempts >= MAX_RETRIES ? "FAILED" : "PENDING",
-        attempts: updateAttempts,
-        availableAt: new Date(Date.now() + 5000)
-      }
-    })
+    const updateAttempts = job.attempts + 1;
+
+    if (updateAttempts >= MAX_RETRIES) {
+      await prisma.$transaction(async (tx) => {
+        await tx.deadLetterJob.create({
+          data: {
+            originalId: job.id,
+            jobType: job.job_type,
+            payload: job.payload,
+            attempts: updateAttempts,
+            error: String(error)
+          }
+        });
+
+        await tx.job.update({
+          where: {
+            id: job.id
+          },
+          data: {
+            status: 'FAILED',
+            attempts: updateAttempts,
+          }
+        })
+
+        await tx.idempotencyKey.update({
+          where: {
+            idemKey: job.idem_key
+          },
+          data: {
+            status: 'FAILED'
+          }
+        })
+      })
+    } else {
+      await prisma.job.update({
+        where: {
+          id: job.id
+        },
+        data: {
+          status: "PENDING",
+          attempts: updateAttempts,
+          availableAt: new Date(Date.now() + 5000)
+        }
+      })
+    }
 
     console.error(`Job ${job.id} failed : ${error}`)
   }
