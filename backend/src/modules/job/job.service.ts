@@ -5,7 +5,7 @@ import { Prisma } from "../../../generated/prisma/client";
 export async function createJobService(data: CreateJobInput, idemKey: string){
   // this will do the database calls
   try{
-    await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx) => {
       
       const job = await prisma.job.create({
         data: {
@@ -22,7 +22,7 @@ export async function createJobService(data: CreateJobInput, idemKey: string){
         idemKey: job.idem_key,
       }
       })
-      
+
       return job;
     })
   
