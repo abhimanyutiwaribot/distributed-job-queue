@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { createJobService, getAllJobService, getJobByIdService } from "./job.service";
 import { createJobSchema } from "./job.validation";
-import { IdemKeySchema } from "../../validation/idemKey.validation";
+import { IdemKeySchema } from "../../validation/validation.idemKey";
 
 export async function createJob(req: Request, res: Response) {
   try {
