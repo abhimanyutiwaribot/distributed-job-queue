@@ -32,6 +32,16 @@ model IdempotencyKey {
   createdAt DateTime  @default(now())
 }
 
+model DeadLetterJob {
+  id            String    @unique    @id   @default(uuid())
+  originalId    String    @unique
+  jobType       JobType
+  payload       Json
+  attempts      Int
+  error         String?
+  failedAt      DateTime  @default(now())
+}
+
 enum IdempotencyStatus {
   PROCESSING
   COMPLETED
