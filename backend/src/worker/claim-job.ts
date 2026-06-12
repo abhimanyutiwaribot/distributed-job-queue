@@ -34,6 +34,15 @@ export async function claimJob() {
       },
     });
 
+    await tx.idempotencyKey.update({
+      where: {
+        idemKey: job.idem_key
+      },
+      data: {
+        status: 'PROCESSING'
+      }
+    })
+
     return job;
   });
 } 
