@@ -19,6 +19,8 @@ export async function sendEmailHandler(payload: SendEmailPayload) {
   } catch (error) {
     console.error(`Failed to Send Email: ${error}`)
   }
+
+  // throw new Error("Forced Failure")
 }
 
 // await sendEmailHandler(
