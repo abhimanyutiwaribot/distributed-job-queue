@@ -46,3 +46,26 @@ export async function requeueDLQJob(dlqId: string){
     return error
   }
 }
+
+export async function getAllDLQJob(skip: number, take: number) {
+  const [jobs, total] = await Promise.all([
+    prisma.deadLetterJob.findMany({
+      skip,
+      take,
+      orderBy: {
+        failedAt: "desc"
+      }
+    }),
+    prisma.deadLetterJob.count()
+  ]);
+
+  return { jobs, total };
+}
+
+export function getDLQJobById(id: string) {
+  return prisma.deadLetterJob.findUnique({
+    where: {
+      id
+    }
+  });
+}
