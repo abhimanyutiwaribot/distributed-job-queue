@@ -1,11 +1,13 @@
 import express from "express";
 import { jobRouter } from "./modules/job/job.route.ts";
+import { dlqRouter } from "./modules/dlq/dlq.route.ts";
 const app = express();
 
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use("/api/v1", jobRouter);
+app.use("/api/v1/dlq", dlqRouter)
 
 
 app.listen(PORT, () => {
