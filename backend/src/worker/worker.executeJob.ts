@@ -72,6 +72,7 @@ export async function executeJob(job: Job) {
           data: {
             originalId: job.id,
             jobType: job.job_type,
+            idemKey: job.idem_key,
             payload: job.payload,
             attempts: updateAttempts,
             error: String(error)
