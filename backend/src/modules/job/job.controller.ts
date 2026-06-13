@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { createJobService, getAllJobService, getJobByIdService } from "./job.service";
+import { createJobService, getAllJobsService, getJobByIdService } from "./job.service";
 import { createJobSchema } from "./job.validation";
 import { IdemKeySchema } from "../../validation/validation.idemKey";
 
@@ -61,10 +61,22 @@ export async function createJob(req: Request, res: Response) {
 
 export async function getAllJob(req: Request, res: Response) {
   try {
-    const jobs = await getAllJobService();
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+
+    const { jobs, total } = await getAllJobsService(skip, limit);
+    const totalPages = Math.ceil(total / limit);
+
     return res.status(200).json({
       message: "Fetched All Jobs",
-      data: jobs
+      data: jobs,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages
+      }
     })
   }
   catch (error) {
@@ -77,7 +89,21 @@ export async function getAllJob(req: Request, res: Response) {
 
 export async function getJobById(req: Request, res: Response) {
   try {
-    const job = await getJobByIdService();
+    const id = req.params.id;
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        message: "Invalid or missing job ID"
+      });
+    }
+
+    const job = await getJobByIdService(id);
+    
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found"
+      });
+    }
+
     return res.status(200).json({
       message: "Fetched Job",
       data: job

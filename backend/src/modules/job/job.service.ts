@@ -42,10 +42,25 @@ export async function createJobService(data: CreateJobInput, idemKey: string){
   }
 }
 
-export function getAllJobService(){
-  // this will do the database calls
+export async function getAllJobsService(skip: number, take: number){
+  const [jobs, total] = await Promise.all([
+    prisma.job.findMany({
+      skip,
+      take,
+      orderBy: {
+        createdAt: "desc"
+      }
+    }),
+    prisma.job.count()
+  ]);
+
+  return { jobs, total };
 }
 
-export function getJobByIdService(){
-  // this will do the database calls
+export function getJobByIdService(id: string){
+  return prisma.job.findUnique({
+    where: {
+      id
+    }
+  });
 }
