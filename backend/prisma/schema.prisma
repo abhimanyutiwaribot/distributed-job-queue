@@ -35,6 +35,7 @@ model IdempotencyKey {
 model DeadLetterJob {
   id            String    @unique    @id   @default(uuid())
   originalId    String    @unique
+  idemKey       String
   jobType       JobType
   payload       Json
   attempts      Int
