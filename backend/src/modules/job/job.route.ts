@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { createJob, getAllJob, getJobById } from "./job.controller";
+import { createJobLimiter } from "../../middleware/rate-limiter";
+
 
 export const jobRouter = Router();
 
@@ -10,4 +12,4 @@ jobRouter.get("/jobs", getAllJob)
 jobRouter.get("/jobs/:id", getJobById)
 
 // create a job
-jobRouter.post("/jobs", createJob)
+jobRouter.post("/jobs", createJobLimiter, createJob)
