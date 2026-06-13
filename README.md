@@ -93,25 +93,25 @@ Tables:
 
 ### Concurrent Worker Processing
 
-Multiple workers may attempt to claim the same job simultaneously. To solve this, workers use PostgreSQL row-level locking: FOR UPDATE SKIP LOCKED
+> Multiple workers may attempt to claim the same job simultaneously. To solve this, workers use PostgreSQL row-level locking: FOR UPDATE SKIP LOCKED
 
-This guarantees that only one worker can claim a job at a time.
+> This guarantees that only one worker can claim a job at a time.
 
 ### Retry Mechanism
 
-Failed jobs are automatically retried up to the configured retry limit before being moved to the Dead Letter Queue.
+> Failed jobs are automatically retried up to the configured retry limit before being moved to the Dead Letter Queue.
 
 ### Dead Letter Queue
 
-Jobs that exceed the retry limit are moved into a dedicated DeadLetterJob table for inspection and manual reprocessing.
+> Jobs that exceed the retry limit are moved into a dedicated DeadLetterJob table for inspection and manual reprocessing.
 
 ### Idempotency
 
-The system prevents duplicate job creation and duplicate job execution through idempotency keys.
+> The system prevents duplicate job creation and duplicate job execution through idempotency keys.
 
 ### Stuck Job Recovery
 
-If a worker crashes after claiming a job, the recovery process detects stale locks and moves abandoned jobs back into the queue.
+> If a worker crashes after claiming a job, the recovery process detects stale locks and moves abandoned jobs back into the queue.
 
 ## Running Locally
 
